@@ -39,13 +39,13 @@ router.post("/register", async (req, res) => {
 
         const result = await db.collection("users").insertOne(user);
 
-        res.json({
+        return res.status(201).json({
             message: "Register success",
             userId: result.insertedId,
             user
         });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        return res.status(500).json({ message: err.message });
     }
 });
 
@@ -84,7 +84,7 @@ router.post("/login", async (req, res) => {
             { expiresIn: "7d" }
         );
 
-        return res.json({
+        return res.status(200).json({
             message: "Login success",
             token,
             _id: user._id.toString(),
@@ -94,7 +94,6 @@ router.post("/login", async (req, res) => {
             role: user.role,
         });
 
-        req.user = user
     } catch (err) {
         console.error("POST /api/login error:", err);
         return res.status(500).send("Internal Server Error");
