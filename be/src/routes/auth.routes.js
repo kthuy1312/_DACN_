@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const { ObjectId } = require("mongodb");
+const jwt = require("jsonwebtoken");
 
 const { hashPassword, comparePassword } = require("../utils/password")
 
@@ -73,14 +74,27 @@ router.post("/login", async (req, res) => {
             return res.status(401).send("Invalid email/password");
         }
 
+        //tất cả đều ok
+        const token = jwt.sign(
+            {
+                userId: user._id,
+                role: user.role
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
         return res.json({
             message: "Login success",
+            token,
             _id: user._id.toString(),
             email: user.email,
             name: user.name,
             phone: user.phone,
             role: user.role,
         });
+
+        req.user = user
     } catch (err) {
         console.error("POST /api/login error:", err);
         return res.status(500).send("Internal Server Error");

@@ -7,6 +7,7 @@ const { connectDB } = require("./db");
 const { runSeed } = require("./config/seed");
 const userRoutes = require("./routes/user.routes");
 const authRoutes = require("./routes/auth.routes");
+const transactionRoutes = require("./routes/transaction.routes");
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ async function startServer() {
   // routes
   app.use("/api", userRoutes);
   app.use("/api", authRoutes);
+  app.use("/api", transactionRoutes);
 
   // app.use("/api", authRoutes);
   app.get("/", (req, res) => {
