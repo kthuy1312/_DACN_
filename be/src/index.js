@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 
 const { connectDB } = require("./db");
 const { runSeed } = require("./config/seed");
+const userRoutes = require("./routes/user.routes");
+const authRoutes = require("./routes/auth.routes");
 
 dotenv.config();
 
@@ -17,6 +19,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 async function startServer() {
   const db = await connectDB();
@@ -29,6 +32,10 @@ async function startServer() {
   });
 
   // routes
+  app.use("/api", userRoutes);
+  app.use("/api", authRoutes);
+
+  // app.use("/api", authRoutes);
   app.get("/", (req, res) => {
     res.send("Smart Finance backend is running");
   });

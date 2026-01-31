@@ -1,12 +1,11 @@
 const express = require("express");
-const { connectDB } = require("../db");
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
-    const db = await connectDB();
+router.get("/user", async (req, res) => {
+    const db = req.db;
     const users = await db.collection("users").find().toArray();
-    res.json(users);
+    res.status(200).json({ users });
 });
 
 module.exports = router;

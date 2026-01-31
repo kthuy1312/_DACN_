@@ -1,7 +1,9 @@
 // src/seed.js
 const { ObjectId } = require("mongodb");
+const { hashPassword } = require("../utils/password")
 
 async function runSeed(db) {
+
     const userCount = await db.collection("users").countDocuments();
     if (userCount > 0) {
         console.log("🌱 Seed skipped (data exists)");
@@ -10,10 +12,15 @@ async function runSeed(db) {
 
     console.log("🌱 Running SmartFinance seed...");
 
+    const pwd = "123456"
+    const hashPwd = await hashPassword(pwd)
+
     /* ================= USER ================= */
     const user = {
         email: "admin@smartfinance.dev",
         name: "Admin",
+        password: hashPwd,
+        role: "Admin",
         avatar: "",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
