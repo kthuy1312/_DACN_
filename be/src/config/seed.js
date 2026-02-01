@@ -34,9 +34,10 @@ async function runSeed(db) {
         { name: "Transport", icon: "Bus", type: "expense" },
         { name: "Entertainment", icon: "Film", type: "expense" },
         { name: "Salary", icon: "Wallet", type: "income" },
+        { name: "Default", icon: "CircleDollarSign", type: "income" },
+        { name: "Default", icon: "CircleDollarSign", type: "expense" },
     ].map((c) => ({
         _id: new ObjectId(),
-        userId,
         name: c.name,
         icon: c.icon,
         type: c.type,

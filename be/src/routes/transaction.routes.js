@@ -85,42 +85,57 @@ router.put("/transactions/:transactionId", authMiddleware, async (req, res) => {
         const db = req.db;
         const user = req.user;
         const { transactionId } = req.params;
+        const { amount, type, categoryId, description } = req.body;
 
-        const { amount, type, categoryId, description } = req.body
-
-        if (!user) {
-            return res.status(401).json({ message: "Không có user" });
+        if (!ObjectId.isValid(transactionId)) {
+            return res.status(400).json({ message: "transactionId không hợp lệ" });
         }
 
-        if (!amount || !description || !type || !categoryId) {
-            return res.status(400).json({ message: "Missing fields" });
+        if (!amount && !type && !categoryId && !description) {
+            return res.status(400).json({ message: "Không có dữ liệu để cập nhật" });
         }
 
-        if (type !== "income" && type !== "expense") {
-            return res.status(400).json({ message: "Type của transaction không hợp lệ" });
-        }
-
-        const amountNumber = Number(amount);
-        if (isNaN(amountNumber) || amountNumber <= 0) {
-            return res.status(400).json({ message: "Amount không hợp lệ" });
-        }
-
-        const category = await db.collection("categories").findOne({
-            _id: new ObjectId(categoryId),
-            userId: new ObjectId(user._id),
-        });
-        if (!category) {
-            return res.status(400).json({ message: "CategoryId không hợp lệ" });
-        }
-
-        const updateTransaction = {
-            categoryId: new ObjectId(categoryId),
-            categoryName: category.name,
-            categoryIcon: category.icon,
-            type,
-            amount: amountNumber,
-            description,
+        //tt để update
+        let updateTransaction = {
             updatedAt: new Date().toISOString(),
+        };
+
+        if (amount !== undefined) {
+            const amountNumber = Number(amount);
+            if (isNaN(amountNumber) || amountNumber <= 0) {
+                return res.status(400).json({ message: "Amount không hợp lệ" });
+            }
+            updateTransaction.amount = amountNumber;
+        }
+
+        if (type) {
+            if (type !== "income" && type !== "expense") {
+                return res.status(400).json({ message: "Type không hợp lệ" });
+            }
+            updateTransaction.type = type;
+        }
+
+        if (description) {
+            updateTransaction.description = description;
+        }
+
+        if (categoryId) {
+            if (!ObjectId.isValid(categoryId)) {
+                return res.status(400).json({ message: "CategoryId không hợp lệ" });
+            }
+
+            const category = await db.collection("categories").findOne({
+                _id: new ObjectId(categoryId),
+                userId: new ObjectId(user._id),
+            });
+
+            if (!category) {
+                return res.status(400).json({ message: "Category không tồn tại" });
+            }
+
+            updateTransaction.categoryId = category._id;
+            updateTransaction.categoryName = category.name;
+            updateTransaction.categoryIcon = category.icon;
         }
 
         const result = await db.collection("transactions").updateOne(
@@ -135,15 +150,13 @@ router.put("/transactions/:transactionId", authMiddleware, async (req, res) => {
             return res.status(404).json({ message: "Transaction không tồn tại" });
         }
 
-        return res.status(200).json({
-            message: "Cập nhật transaction thành công",
-            result
-        });
+        return res.json({ message: "Cập nhật transaction thành công" });
 
     } catch (err) {
         return res.status(500).json({ message: err.message });
     }
 });
+
 
 // DELETE /api/transactions/:id
 router.delete("/transactions/:transactionId", authMiddleware, async (req, res) => {
@@ -152,6 +165,10 @@ router.delete("/transactions/:transactionId", authMiddleware, async (req, res) =
         const db = req.db;
         const user = req.user;
         const { transactionId } = req.params;
+
+        if (!ObjectId.isValid(transactionId)) {
+            return res.status(400).json({ message: "transactionId không hợp lệ" });
+        }
 
         const result = await db.collection("transactions").deleteOne(
             {

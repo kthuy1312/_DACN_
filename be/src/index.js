@@ -8,6 +8,7 @@ const { runSeed } = require("./config/seed");
 const userRoutes = require("./routes/user.routes");
 const authRoutes = require("./routes/auth.routes");
 const transactionRoutes = require("./routes/transaction.routes");
+const categoryRoutes = require("./routes/category.routes");
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ async function startServer() {
   app.use("/api", userRoutes);
   app.use("/api", authRoutes);
   app.use("/api", transactionRoutes);
+  app.use("/api", categoryRoutes);
 
   // app.use("/api", authRoutes);
   app.get("/", (req, res) => {
