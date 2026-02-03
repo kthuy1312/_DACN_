@@ -45,7 +45,10 @@ export default function RootLayout({
           {children}
         </AuthProvider>
         <Analytics />
-        <Toaster richColors />
+        <Toaster richColors toastOptions={{
+          className:
+            "px-3 py-2 min-h-0 rounded-md text-sm leading-snug",
+        }} />
       </body>
     </html>
   )

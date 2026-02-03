@@ -12,17 +12,18 @@ export default function AuthModal() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
 
-  const { login } = useAuth()
+  const { login, register } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
     if (!email || !password) {
-      setError("Please enter your email and password.")
+      setError("Please enter your email and password")
       return
     }
 
@@ -36,15 +37,44 @@ export default function AuthModal() {
       return
     }
 
-    const result = await login(email, password)
+    const result = isSignUp
+      ? await register(email, password, name)
+      : await login(email, password)
 
     if (!result.success) {
-      setError(result.message || "Login failed")
+      setError(result.message || "Action failed")
+      return
     }
-    else {
-      toast.success("Welcome back!")
+
+    if (isSignUp) {
+      toast.success(
+        <div className="text-sm leading-relaxed">
+          <p className="font-medium">Account created successfully 🎉</p>
+          <p className="text-muted-foreground">
+            Please sign in to continue.
+          </p>
+        </div>
+      )
+
+      setIsSignUp(false)
+      setEmail("")
+      setName("")
+      setPassword("")
+      setConfirmPassword("")
+    } else {
+      toast.success(
+        <div className="text-sm leading-snug">
+          <p className="font-medium">
+            Welcome to Spendio ✨
+          </p>
+          <p className="text-muted-foreground">
+            Let’s manage your finances smarter!
+          </p>
+        </div>
+      )
     }
   }
+
 
 
   return (
@@ -106,6 +136,16 @@ export default function AuthModal() {
                   onChange={setEmail}
                   placeholder="you@example.com"
                 />
+
+                {isSignUp && (
+                  <InputField
+                    label="Name"
+                    type="name"
+                    value={name}
+                    onChange={setName}
+                    placeholder="yourname"
+                  />
+                )}
 
                 <InputField
                   label="Password"
@@ -176,7 +216,7 @@ export default function AuthModal() {
   )
 }
 
-/* ================== COMPONENT PHỤ ================== */
+/*  COMPONENT PHỤ  */
 
 function Feature({
   icon,
