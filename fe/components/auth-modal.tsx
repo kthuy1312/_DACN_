@@ -1,44 +1,51 @@
 'use client'
 
-import React from 'react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { BarChart3, Sparkles, TrendingUp } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import { toast } from "sonner";
 
-interface AuthModalProps {
-  onAuth: (email: string, password: string, isSignUp: boolean) => void
-}
-
-export default function AuthModal({ onAuth }: AuthModalProps) {
+export default function AuthModal() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { login } = useAuth()
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
+    setError("")
 
     if (!email || !password) {
-      setError('Please fill in all fields')
-      return
-    }
-
-    if (isSignUp && password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError("Please enter your email and password.")
       return
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+      setError("Password length must be more than 6 characters")
       return
     }
 
-    onAuth(email, password, isSignUp)
+    if (isSignUp && password !== confirmPassword) {
+      setError("The verification password does not match")
+      return
+    }
+
+    const result = await login(email, password)
+
+    if (!result.success) {
+      setError(result.message || "Login failed")
+    }
+    else {
+      toast.success("Welcome back!")
+    }
   }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-600 to-black flex items-center justify-center p-4">
@@ -47,70 +54,44 @@ export default function AuthModal({ onAuth }: AuthModalProps) {
         {/* LEFT */}
         <div className="hidden md:flex flex-col justify-center space-y-8">
           <div className="space-y-4">
-            <h1 className="text-6xl font-bold text-white dark:text-foreground">
-              Spendio
-            </h1>
-            <p className="text-xl text-slate-300 dark:text-secondary">
+            <h1 className="text-6xl font-bold text-white">Spendio</h1>
+            <p className="text-xl text-slate-300">
               Smart Personal Finance Management
             </p>
           </div>
 
           <div className="space-y-5">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shadow-sm">
-                <BarChart3 className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-100">
-                  Track Expenses
-                </h3>
-                <p className="text-slate-300 text-sm">
-                  Effortlessly monitor all your spending
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
-                <Sparkles className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-100">
-                  AI-Powered Insights
-                </h3>
-                <p className="text-slate-300 text-sm">
-                  Get smart recommendations powered by AI
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 shadow-sm">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-100">
-                  Visualize Trends
-                </h3>
-                <p className="text-slate-300 text-sm">
-                  Beautiful charts for better understanding
-                </p>
-              </div>
-            </div>
-
-
+            <Feature
+              icon={<BarChart3 className="w-6 h-6" />}
+              title="Track Expenses"
+              desc="Effortlessly monitor all your spending"
+              color="bg-blue-100 text-blue-600"
+            />
+            <Feature
+              icon={<Sparkles className="w-6 h-6" />}
+              title="AI-Powered Insights"
+              desc="Get smart recommendations powered by AI"
+              color="bg-emerald-100 text-emerald-600"
+            />
+            <Feature
+              icon={<TrendingUp className="w-6 h-6" />}
+              title="Visualize Trends"
+              desc="Beautiful charts for better understanding"
+              color="bg-purple-100 text-purple-600"
+            />
           </div>
         </div>
 
         {/* RIGHT */}
         <div className="flex items-center justify-center">
-          <Card className="w-full border-border bg-background dark:bg-slate-800 shadow-xl rounded-xl overflow-hidden">
+          <Card className="w-full bg-background shadow-xl rounded-xl">
             <div className="p-8 space-y-6">
+
               <div className="text-center space-y-2">
-                <h2 className="text-4xl font-bold text-foreground">
+                <h2 className="text-4xl font-bold">
                   {isSignUp ? 'Create Account' : 'Welcome Back'}
                 </h2>
-                <p className="text-secondary text-sm font-medium">
+                <p className="text-secondary text-sm">
                   {isSignUp
                     ? 'Join us and start managing your finances'
                     : 'Log in to your account'}
@@ -118,65 +99,48 @@ export default function AuthModal({ onAuth }: AuthModalProps) {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Email Address
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
+                <InputField
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={setEmail}
+                  placeholder="you@example.com"
+                />
 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Password
-                  </label>
-                  <Input
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
+                <InputField
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={setPassword}
+                  placeholder="••••••••"
+                />
 
                 {isSignUp && (
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Confirm Password
-                    </label>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                  </div>
+                  <InputField
+                    label="Confirm Password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={setConfirmPassword}
+                    placeholder="••••••••"
+                  />
                 )}
 
                 {error && (
-                  <div className="p-3 bg-destructive/10 border border-destructive rounded-lg">
-                    <p className="text-destructive text-sm">{error}</p>
+                  <div className="border border-red-300/30 bg-red-50/40 rounded-md px-3 py-2">
+                    <p className="text-[15px] text-red-600 text-center leading-snug">
+                      {error}
+                    </p>
                   </div>
                 )}
 
-                <Button className="w-full h-10 font-semibold">
+                <Button
+                  type="submit"
+                  className="w-full text-white!"
+                >
                   {isSignUp ? 'Create Account' : 'Sign In'}
                 </Button>
-              </form>
 
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-background text-secondary">
-                    or
-                  </span>
-                </div>
-              </div>
+              </form>
 
               <button
                 type="button"
@@ -184,16 +148,82 @@ export default function AuthModal({ onAuth }: AuthModalProps) {
                   setIsSignUp(!isSignUp)
                   setError('')
                 }}
-                className="w-full text-primary hover:text-accent font-medium"
+                className="w-full text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
               >
-                {isSignUp
-                  ? 'Have an account? Sign In'
-                  : "Don't have an account? Sign Up"}
+                {isSignUp ? (
+                  <>
+                    Already have an account?{" "}
+                    <span className="font-medium text-primary hover:underline">
+                      Sign In
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Don&apos;t have an account?{" "}
+                    <span className="font-medium text-primary hover:underline">
+                      Sign Up
+                    </span>
+                  </>
+                )}
               </button>
+
             </div>
           </Card>
         </div>
+
       </div>
+    </div>
+  )
+}
+
+/* ================== COMPONENT PHỤ ================== */
+
+function Feature({
+  icon,
+  title,
+  desc,
+  color,
+}: {
+  icon: React.ReactNode
+  title: string
+  desc: string
+  color: string
+}) {
+  return (
+    <div className="flex items-start gap-4">
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
+        {icon}
+      </div>
+      <div>
+        <h3 className="font-semibold text-slate-100">{title}</h3>
+        <p className="text-slate-300 text-sm">{desc}</p>
+      </div>
+    </div>
+  )
+}
+
+function InputField({
+  label,
+  type,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string
+  type: string
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium mb-2">{label}</label>
+      <Input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </div>
   )
 }

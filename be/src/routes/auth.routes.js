@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 
 const { hashPassword, comparePassword } = require("../utils/password")
 
-
 // POST /api/register
 router.post("/register", async (req, res) => {
     try {
@@ -58,20 +57,20 @@ router.post("/login", async (req, res) => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).send("Email and password are required");
+            return res.status(400).json({ message: "Email and password are required" });
         }
 
         // Tìm user theo email
         const user = await db.collection("users").findOne({ email });
 
         if (!user) {
-            return res.status(404).send("Invalid email/password");
+            return res.status(401).json({ message: "Invalid email/password" });
         }
 
         // Check password
         const isMatch = await comparePassword(password, user.password);
         if (!isMatch) {
-            return res.status(401).send("Invalid email/password");
+            return res.status(401).json({ message: "Invalid email/password" });
         }
 
         //tất cả đều ok
@@ -96,7 +95,7 @@ router.post("/login", async (req, res) => {
 
     } catch (err) {
         console.error("POST /api/login error:", err);
-        return res.status(500).send("Internal Server Error");
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 });
 
