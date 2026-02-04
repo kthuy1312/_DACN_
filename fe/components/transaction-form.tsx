@@ -1,13 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import Icon from '@/lib/icon';
 
+interface Category {
+  _id: string
+  name: string
+  icon: string
+}
 interface TransactionFormProps {
-  categories: string[];
+  categories: Category[];
   onAddTransaction: (
     description: string,
     amount: number,
@@ -21,11 +27,22 @@ export default function TransactionForm({
   categories,
   onAddTransaction,
 }: TransactionFormProps) {
+
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState(categories[0] || '');
+  const [category, setCategory] = useState<string>('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      setCategory(categories[0]._id);
+    }
+  }, [categories]);
+
+  //cho phần chọn category
+  const [open, setOpen] = useState(false)
+  const selectedCategory = categories.find(c => c._id === category)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +56,7 @@ export default function TransactionForm({
 
     setDescription('');
     setAmount('');
-    setCategory(categories[0] || '');
+    setCategory(categories[0]?._id || '');
     setType('expense');
     setDate(new Date().toISOString().split('T')[0]);
   };
@@ -101,22 +118,70 @@ export default function TransactionForm({
             />
           </div>
 
-          <div>
+          <div className="relative">
             <label className="text-sm font-medium text-foreground mb-1 block">
               Category
             </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+
+            {/* Selected */}
+            <button
+              type="button"
+              onClick={() => setOpen(!open)}
+              className="
+                   w-full
+                   flex items-center justify-between
+                   rounded-md border border-border
+                   bg-input
+                   px-3 py-2
+                   text-sm
+                   text-foreground
+                   hover:bg-muted
+                 "
             >
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+              <div className="flex items-center gap-2">
+                {selectedCategory?.icon && (
+                  <Icon name={selectedCategory.icon} />
+                )}
+                <span>{selectedCategory?.name || 'Select category'}</span>
+              </div>
+              <span className="text-muted-foreground">▾</span>
+            </button>
+
+            {/* Dropdown */}
+            {open && (
+              <ul
+                className="
+                     absolute z-50 mt-1 w-full
+                     rounded-md border border-border
+                     bg-popover
+                     shadow-md
+                     max-h-60
+                     overflow-y-auto
+                   "
+              >
+                {categories.map((cat) => (
+                  <li
+                    key={cat._id}
+                    onClick={() => {
+                      setCategory(cat._id)
+                      setOpen(false)
+                    }}
+                    className="
+                         flex items-center gap-2
+                         px-3 py-2
+                         text-sm
+                         cursor-pointer
+                         hover:bg-muted
+                       "
+                  >
+                    {cat.icon && <Icon name={cat.icon} />}
+                    <span>{cat.name}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+
 
           <div>
             <label className="text-sm font-medium text-foreground mb-1 block">

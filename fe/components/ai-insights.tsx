@@ -14,9 +14,16 @@ interface Transaction {
   date: string;
 }
 
+type LucideIconName = string
+interface Category {
+  _id: string
+  name: string
+  icon: LucideIconName
+}
+
 interface AIInsightsProps {
   transactions: Transaction[];
-  categories: string[];
+  categories: Category[];
 }
 
 export default function AIInsights({

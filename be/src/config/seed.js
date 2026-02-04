@@ -17,10 +17,10 @@ async function runSeed(db) {
 
     /* ================= USER ================= */
     const user = {
-        email: "admin@smartfinance.dev",
-        name: "Admin",
+        email: "1@gmail.com",
+        name: "1111",
         password: hashPwd,
-        role: "Admin",
+        role: "Client",
         avatar: "",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -30,19 +30,31 @@ async function runSeed(db) {
 
     /* ================= CATEGORIES ================= */
     const categories = [
-        { name: "Food", icon: "Utensils", type: "expense" },
-        { name: "Transport", icon: "Bus", type: "expense" },
-        { name: "Entertainment", icon: "Film", type: "expense" },
-        { name: "Salary", icon: "Wallet", type: "income" },
-        { name: "Default", icon: "CircleDollarSign", type: "income" },
-        { name: "Default", icon: "CircleDollarSign", type: "expense" },
+        { name: "Food", icon: "Utensils" },
+        { name: "Transportation", icon: "Car" },
+        { name: "Entertainment", icon: "Film" },
+        { name: "Utilities", icon: "Lightbulb" },
+        { name: "Healthcare", icon: "HeartPulse" },
+        { name: "Shopping", icon: "ShoppingBag" },
+
+        { name: "Income", icon: "DollarSign" },
+        { name: "Salary", icon: "Briefcase" },
+        { name: "Freelance", icon: "Laptop" },
+
+        { name: "Subscription", icon: "CreditCard" },
+        { name: "Travel", icon: "Plane" },
+        { name: "Rent", icon: "Home" },
+        { name: "Insurance", icon: "Shield" },
+        { name: "Education", icon: "GraduationCap" },
+        { name: "Fitness", icon: "Dumbbell" },
+        { name: "Dining", icon: "Pizza" },
+        { name: "Gas", icon: "Fuel" },
+        { name: "Groceries", icon: "ShoppingCart" },
+        { name: "Other", icon: "Tag" }
     ].map((c) => ({
         _id: new ObjectId(),
         name: c.name,
         icon: c.icon,
-        type: c.type,
-        isDefault: true,
-        createdAt: new Date().toISOString(),
     }));
 
     await db.collection("categories").insertMany(categories);

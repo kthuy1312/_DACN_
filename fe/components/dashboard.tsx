@@ -11,15 +11,15 @@ import {
   User as UserIcon,
   Settings
 } from 'lucide-react'
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import TransactionList from './transaction-list';
 import BalanceCard from './balance-card';
 import TransactionForm from './transaction-form';
 import Analytics from './analytics';
-import CategoryManager from './category-manager';
 import AIInsights from './ai-insights';
 import CalendarView from './calendar-view';
 import MonthlySummary from './monthly-summary';
+import { useTransactions } from '@/context/TransactionContext';
 
 interface User {
   id: string;
@@ -42,6 +42,13 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ activeView, user }: DashboardProps) { // Declare user variable
+
+  const { categories, getAllCategories } = useTransactions()
+
+  useEffect(() => {
+    getAllCategories()
+  }, [])
+
   const [transactions, setTransactions] = useState<Transaction[]>([
     {
       id: '1',
@@ -77,15 +84,6 @@ export default function Dashboard({ activeView, user }: DashboardProps) { // Dec
     },
   ]);
 
-  const [categories, setCategories] = useState<string[]>([
-    'Food',
-    'Transportation',
-    'Entertainment',
-    'Utilities',
-    'Healthcare',
-    'Shopping',
-    'Income',
-  ]);
 
   const balanceData = useMemo(() => {
     const income = transactions
@@ -132,11 +130,7 @@ export default function Dashboard({ activeView, user }: DashboardProps) { // Dec
     setTransactions(transactions.filter((t) => t.id !== id));
   };
 
-  const handleAddCategory = (category: string) => {
-    if (!categories.includes(category)) {
-      setCategories([...categories, category]);
-    }
-  };
+
 
   const renderView = () => {
     switch (activeView) {
@@ -160,7 +154,7 @@ export default function Dashboard({ activeView, user }: DashboardProps) { // Dec
               />
             </div>
 
-            {/* 🔥 ANALYTICS – RIÊNG */}
+            {/*ANALYTICS – RIÊNG */}
             <div className="bg-card border border-border rounded-2xl p-6">
               <Analytics transactions={transactions} />
             </div>
@@ -225,23 +219,6 @@ export default function Dashboard({ activeView, user }: DashboardProps) { // Dec
           </div>
         )
 
-
-      case 'categories':
-        return (
-          <div className="space-y-6">
-            <h2 className="flex items-center gap-2 text-2xl font-bold">
-              <Tags className="w-6 h-6 text-primary" />
-              Manage Categories
-            </h2>
-
-            <div className="bg-card border border-border rounded-xl p-6">
-              <CategoryManager
-                categories={categories}
-                onAddCategory={handleAddCategory}
-              />
-            </div>
-          </div>
-        )
 
       case 'insights':
         return (

@@ -43,7 +43,6 @@ export default function Sidebar({
     { id: 'transactions', label: 'Transactions', icon: CreditCard },
     { id: 'calendar', label: 'Calendar', icon: Calendar },
     { id: 'analytics', label: 'Analytics', icon: LineChart },
-    { id: 'categories', label: 'Categories', icon: Tags },
     { id: 'insights', label: 'AI Insights', icon: Sparkles },
     { id: 'settings', label: 'Settings', icon: Settings },
   ]

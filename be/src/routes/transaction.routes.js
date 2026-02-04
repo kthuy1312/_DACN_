@@ -31,7 +31,6 @@ router.post("/transactions", authMiddleware, async (req, res) => {
 
         const category = await db.collection("categories").findOne({
             _id: new ObjectId(categoryId),
-            userId: new ObjectId(user._id),
         });
         if (!category) {
             return res.status(400).json({ message: "CategoryId không hợp lệ" });
@@ -126,7 +125,6 @@ router.put("/transactions/:transactionId", authMiddleware, async (req, res) => {
 
             const category = await db.collection("categories").findOne({
                 _id: new ObjectId(categoryId),
-                userId: new ObjectId(user._id),
             });
 
             if (!category) {

@@ -35,16 +35,11 @@ export interface RegisterPayload extends LoginPayload {
 //CATEGORY
 export type LucideIconName = string
 
-export type CategoryType = 'income' | 'expense'
 
 export interface Category {
     _id: ID
-    userId: ID //chủ sở hữu
     name: string
-    icon: LucideIconName //tên icon Lucide
-    type: CategoryType
-    isDefault: boolean
-    createdAt: DateString
+    icon: LucideIconName
 }
 
 // Category → nhiều Transaction
@@ -60,10 +55,9 @@ export interface Transaction {
     categoryName: string // snapshot
     categoryIcon?: LucideIconName
 
-    type: CategoryType
+    type: string
     amount: number
     description?: string
-    date: DateString
 
     createdAt: DateString
 }

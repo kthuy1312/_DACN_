@@ -6,6 +6,7 @@ import './globals.css'
 import { AuthProvider } from "@/context/AuthContext"
 import 'antd/dist/reset.css'
 import { Toaster } from 'sonner'
+import { TransactionProvider } from "@/context/TransactionContext"
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -40,16 +41,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
+      <body className="font-sans antialiased">
         <AuthProvider>
-          {children}
+          <TransactionProvider>
+            {children}
+          </TransactionProvider>
         </AuthProvider>
+
         <Analytics />
-        <Toaster richColors toastOptions={{
-          className:
-            "px-3 py-2 min-h-0 rounded-md text-sm leading-snug",
-        }} />
+        <Toaster
+          richColors
+          toastOptions={{
+            className:
+              "px-3 py-2 min-h-0 rounded-md text-sm leading-snug",
+          }}
+        />
       </body>
     </html>
+
   )
 }
