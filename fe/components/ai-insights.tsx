@@ -5,16 +5,24 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Lightbulb, Pin, Sparkles } from 'lucide-react';
 
-interface Transaction {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  type: 'income' | 'expense';
-  date: string;
+export type LucideIconName = string
+export type DateString = string
+
+export interface Transaction {
+  _id: string
+  userId: string
+
+  categoryId: string
+  categoryName: string
+  categoryIcon?: LucideIconName
+
+  type: "income" | "expense"
+  amount: number
+  description?: string
+
+  createdAt: DateString
 }
 
-type LucideIconName = string
 interface Category {
   _id: string
   name: string
@@ -45,10 +53,11 @@ export default function AIInsights({
 
     const expenseByCategory: { [key: string]: number } = {};
     transactions
-      .filter((t) => t.type === 'expense')
-      .forEach((t) => {
-        expenseByCategory[t.category] = (expenseByCategory[t.category] || 0) + t.amount;
-      });
+      .filter(t => t.type === 'expense')
+      .forEach(t => {
+        expenseByCategory[t.categoryName] =
+          (expenseByCategory[t.categoryName] || 0) + t.amount
+      })
 
     const topCategory = Object.entries(expenseByCategory).sort(
       ([, a], [, b]) => b - a,

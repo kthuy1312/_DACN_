@@ -33,6 +33,7 @@ interface TransactionContextType {
     transactions: Transaction[]
     loading: boolean
     getAllCategories: () => Promise<{ success: boolean; message?: string, categories?: Category[] }>
+    getTransactions: () => Promise<{ success: boolean; message?: string, transactions?: Transaction[] }>
 
 }
 
@@ -82,6 +83,44 @@ export const TransactionProvider = ({
         }
     }
 
+    const getTransactions = async () => {
+        try {
+            setLoading(true)
+            const token = localStorage.getItem("token")
+
+            const res = await fetch(`${API_URL}/api/transactions`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                return {
+                    success: false,
+                    message: data.message || "Get transactions failed",
+                }
+            }
+
+            setTransactions(data.transaction)
+
+            return {
+                success: true,
+                transactions: data.transaction,
+            }
+        } catch (err) {
+            console.error("GET TRANSACTIONS ERROR:", err)
+            return {
+                success: false,
+                message: "Server error",
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
 
 
     return (
@@ -90,7 +129,8 @@ export const TransactionProvider = ({
                 categories,
                 transactions,
                 loading,
-                getAllCategories
+                getAllCategories,
+                getTransactions
             }}
         >
             {children}

@@ -1,14 +1,22 @@
 'use client';
 
-interface Transaction {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  type: 'income' | 'expense';
-  date: string;
-}
+export type LucideIconName = string
+export type DateString = string
 
+export interface Transaction {
+  _id: string
+  userId: string
+
+  categoryId: string
+  categoryName: string
+  categoryIcon?: LucideIconName
+
+  type: "income" | "expense"
+  amount: number
+  description?: string
+
+  createdAt: DateString
+}
 interface MonthlySummaryProps {
   transactions: Transaction[];
 }
@@ -19,7 +27,7 @@ export default function MonthlySummary({ transactions }: MonthlySummaryProps) {
   const month = now.getMonth();
 
   const monthTransactions = transactions.filter((t) => {
-    const tDate = new Date(t.date);
+    const tDate = new Date(t.createdAt);
     return tDate.getMonth() === month && tDate.getFullYear() === year;
   });
 
@@ -36,9 +44,9 @@ export default function MonthlySummary({ transactions }: MonthlySummaryProps) {
   const expensesByCategory = monthTransactions
     .filter((t) => t.type === 'expense')
     .reduce((acc, t) => {
-      acc[t.category] = (acc[t.category] || 0) + t.amount;
-      return acc;
-    }, {} as Record<string, number>);
+      acc[t.categoryName] = (acc[t.categoryName] || 0) + t.amount
+      return acc
+    }, {} as Record<string, number>)
 
   const topCategories = Object.entries(expensesByCategory)
     .sort(([, a], [, b]) => b - a)

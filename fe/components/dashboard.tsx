@@ -43,46 +43,13 @@ interface DashboardProps {
 
 export default function Dashboard({ activeView, user }: DashboardProps) { // Declare user variable
 
-  const { categories, getAllCategories } = useTransactions()
+  const { categories, transactions, getAllCategories, getTransactions } = useTransactions()
 
   useEffect(() => {
     getAllCategories()
+    getTransactions()
   }, [])
 
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      id: '1',
-      description: 'Salary',
-      amount: 3000,
-      category: 'Income',
-      type: 'income',
-      date: new Date().toISOString().split('T')[0],
-    },
-    {
-      id: '2',
-      description: 'Grocery Shopping',
-      amount: 150,
-      category: 'Food',
-      type: 'expense',
-      date: new Date().toISOString().split('T')[0],
-    },
-    {
-      id: '3',
-      description: 'Gas',
-      amount: 50,
-      category: 'Transportation',
-      type: 'expense',
-      date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
-    },
-    {
-      id: '4',
-      description: 'Movie Tickets',
-      amount: 30,
-      category: 'Entertainment',
-      type: 'expense',
-      date: new Date(Date.now() - 172800000).toISOString().split('T')[0],
-    },
-  ]);
 
 
   const balanceData = useMemo(() => {
@@ -117,17 +84,17 @@ export default function Dashboard({ activeView, user }: DashboardProps) { // Dec
       date,
     };
 
-    setTransactions([newTransaction, ...transactions]);
+    // setTransactions([newTransaction, ...transactions]);
   };
 
   const handleEditTransaction = (id: string, updates: Partial<Transaction>) => {
-    setTransactions(
-      transactions.map((t) => (t.id === id ? { ...t, ...updates } : t))
-    );
+    // setTransactions(
+    //   transactions.map((t) => (t.id === id ? { ...t, ...updates } : t))
+    // );
   };
 
   const handleDeleteTransaction = (id: string) => {
-    setTransactions(transactions.filter((t) => t.id !== id));
+    // setTransactions(transactions.filter((t) => t.id !== id));
   };
 
 

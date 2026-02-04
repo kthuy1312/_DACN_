@@ -1,12 +1,15 @@
 import * as Icons from "lucide-react"
+import { LucideProps } from "lucide-react"
 
 interface IconProps {
-    name: string
+    name?: string
     className?: string
 }
 
 export default function Icon({ name, className }: IconProps) {
-    const LucideIcon = (Icons as any)[name]
+    if (!name) return null
+
+    const LucideIcon = Icons[name as keyof typeof Icons] as React.FC<LucideProps>
 
     if (!LucideIcon) return null
 

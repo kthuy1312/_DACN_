@@ -3,13 +3,22 @@
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface Transaction {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  type: 'income' | 'expense';
-  date: string;
+export type LucideIconName = string
+export type DateString = string
+
+export interface Transaction {
+  _id: string
+  userId: string
+
+  categoryId: string
+  categoryName: string
+  categoryIcon?: LucideIconName
+
+  type: "income" | "expense"
+  amount: number
+  description?: string
+
+  createdAt: DateString
 }
 
 interface CalendarViewProps {
@@ -35,11 +44,11 @@ export default function CalendarView({ transactions }: CalendarViewProps) {
   const transactionsByDate = useMemo(() => {
     const map: { [key: string]: Transaction[] } = {};
     transactions.forEach((transaction) => {
-      if (transaction.date) {
-        if (!map[transaction.date]) {
-          map[transaction.date] = [];
+      if (transaction.createdAt) {
+        if (!map[transaction.createdAt]) {
+          map[transaction.createdAt] = [];
         }
-        map[transaction.date].push(transaction);
+        map[transaction.createdAt].push(transaction);
       }
     });
     return map;
@@ -71,14 +80,14 @@ export default function CalendarView({ transactions }: CalendarViewProps) {
 
   const monthExpenses = transactions
     .filter((t) => {
-      const tDate = new Date(t.date);
+      const tDate = new Date(t.createdAt);
       return tDate.getMonth() === month && tDate.getFullYear() === year && t.type === 'expense';
     })
     .reduce((sum, t) => sum + t.amount, 0);
 
   const monthIncome = transactions
     .filter((t) => {
-      const tDate = new Date(t.date);
+      const tDate = new Date(t.createdAt);
       return tDate.getMonth() === month && tDate.getFullYear() === year && t.type === 'income';
     })
     .reduce((sum, t) => sum + t.amount, 0);
@@ -198,12 +207,12 @@ export default function CalendarView({ transactions }: CalendarViewProps) {
                   <div className="space-y-3">
                     {dayTransactions.map((transaction) => (
                       <div
-                        key={transaction.id}
+                        key={transaction._id}
                         className="flex items-center justify-between p-4 rounded-lg bg-background border border-border hover:border-primary transition-colors"
                       >
                         <div className="flex-1">
                           <p className="font-medium text-foreground">{transaction.description}</p>
-                          <p className="text-sm text-secondary">{transaction.category}</p>
+                          <p className="text-sm text-secondary">{transaction.categoryName}</p>
                         </div>
                         <span
                           className={`font-bold text-lg ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}
@@ -267,7 +276,7 @@ export default function CalendarView({ transactions }: CalendarViewProps) {
                 <span className="text-secondary">Total Transactions</span>
                 <span className="font-semibold text-foreground">
                   {transactions.filter((t) => {
-                    const tDate = new Date(t.date);
+                    const tDate = new Date(t.createdAt);
                     return (
                       tDate.getMonth() === month && tDate.getFullYear() === year
                     );
@@ -278,7 +287,7 @@ export default function CalendarView({ transactions }: CalendarViewProps) {
                 <span className="text-secondary">Income Transactions</span>
                 <span className="font-semibold text-green-600">
                   {transactions.filter((t) => {
-                    const tDate = new Date(t.date);
+                    const tDate = new Date(t.createdAt);
                     return (
                       tDate.getMonth() === month &&
                       tDate.getFullYear() === year &&
@@ -291,7 +300,7 @@ export default function CalendarView({ transactions }: CalendarViewProps) {
                 <span className="text-secondary">Expense Transactions</span>
                 <span className="font-semibold text-red-600">
                   {transactions.filter((t) => {
-                    const tDate = new Date(t.date);
+                    const tDate = new Date(t.createdAt);
                     return (
                       tDate.getMonth() === month &&
                       tDate.getFullYear() === year &&

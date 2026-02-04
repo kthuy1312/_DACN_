@@ -15,15 +15,23 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
-interface Transaction {
-  id: string
-  description: string
-  amount: number
-  category: string
-  type: 'income' | 'expense'
-  date: string
-}
+export type LucideIconName = string
+export type DateString = string
 
+export interface Transaction {
+  _id: string
+  userId: string
+
+  categoryId: string
+  categoryName: string
+  categoryIcon?: LucideIconName
+
+  type: "income" | "expense"
+  amount: number
+  description?: string
+
+  createdAt: DateString
+}
 interface AnalyticsProps {
   transactions: Transaction[];
   fullView?: boolean;
@@ -36,9 +44,11 @@ export default function Analytics({ transactions }: AnalyticsProps) {
 
     transactions.forEach((t) => {
       if (t.type === 'expense') {
-        expense[t.category] = (expense[t.category] || 0) + t.amount
+        expense[t.categoryName] =
+          (expense[t.categoryName] || 0) + t.amount
       } else {
-        income[t.category] = (income[t.category] || 0) + t.amount
+        income[t.categoryName] =
+          (income[t.categoryName] || 0) + t.amount
       }
     })
 

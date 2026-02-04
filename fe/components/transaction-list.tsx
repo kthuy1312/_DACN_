@@ -16,14 +16,24 @@ import {
   Tag,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
+import Icon from '@/lib/icon'
 
-interface Transaction {
-  id: string
-  description: string
+export type LucideIconName = string
+export type DateString = string
+
+export interface Transaction {
+  _id: string
+  userId: string
+
+  categoryId: string
+  categoryName: string
+  categoryIcon?: LucideIconName
+
+  type: "income" | "expense"
   amount: number
-  category: string
-  type: 'income' | 'expense'
-  date: string
+  description?: string
+
+  createdAt: DateString
 }
 
 interface TransactionListProps {
@@ -103,10 +113,10 @@ export default function TransactionList({
       <div className="divide-y divide-border">
         {transactions.map((t) => (
           <div
-            key={t.id}
+            key={t._id}
             className="p-4 group transition-colors hover:bg-muted/50"
           >
-            {editingId === t.id ? (
+            {editingId === t._id ? (
               <div className="space-y-3">
                 <input
                   value={editData.description ?? t.description}
@@ -130,16 +140,22 @@ export default function TransactionList({
 
                 <input
                   type="date"
-                  value={editData.date ?? t.date}
-                  onChange={(e) =>
-                    setEditData({ ...editData, date: e.target.value })
+                  value={
+                    editData.createdAt
+                      ? editData.createdAt.slice(0, 10)
+                      : t.createdAt.slice(0, 10)
                   }
-                  className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm"
+                  onChange={(e) =>
+                    setEditData({
+                      ...editData,
+                      createdAt: e.target.value,
+                    })
+                  }
                 />
 
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleSaveEdit(t.id)}
+                    onClick={() => handleSaveEdit(t._id)}
                     className="flex-1 rounded-md bg-indigo-500 text-white py-2 text-sm font-medium hover:bg-indigo-600"
                   >
                     Save
@@ -159,8 +175,8 @@ export default function TransactionList({
               <div className="flex items-center justify-between">
 
                 <div className="flex items-center gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center text-xl">
-                    {getCategoryIcon(t.category)}
+                  <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center">
+                    <Icon name={t.categoryIcon} />
                   </div>
 
                   <div>
@@ -168,10 +184,11 @@ export default function TransactionList({
                       {t.description}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {t.category} • {formatDate(t.date)}
+                      {t.categoryName} • {formatDate(t.createdAt)}
                     </p>
                   </div>
                 </div>
+
 
                 <div className="flex items-center gap-2">
                   <p
@@ -186,7 +203,7 @@ export default function TransactionList({
 
                   <button
                     onClick={() => {
-                      setEditingId(t.id)
+                      setEditingId(t._id)
                       setEditData(t)
                     }}
                     className="
@@ -203,7 +220,7 @@ export default function TransactionList({
 
                   {/* Delete */}
                   <button
-                    onClick={() => onDelete(t.id)}
+                    onClick={() => onDelete(t._id)}
                     className="
                       opacity-0 group-hover:opacity-100
                       transition
