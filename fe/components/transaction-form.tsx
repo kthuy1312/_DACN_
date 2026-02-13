@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import Icon from '@/lib/icon';
+import { toast } from 'sonner';
 
 interface Category {
   _id: string
@@ -48,7 +49,7 @@ export default function TransactionForm({
     e.preventDefault();
 
     if (!description || !amount || !category || !date) {
-      alert('Please fill in all fields');
+      toast.error('Please fill in all fields');
       return;
     }
 
@@ -195,7 +196,7 @@ export default function TransactionForm({
           </div>
         </div>
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full text-white/90!">
           Add {type === 'income' ? 'Income' : 'Expense'}
         </Button>
       </form>

@@ -20,6 +20,8 @@ import AIInsights from './ai-insights';
 import CalendarView from './calendar-view';
 import MonthlySummary from './monthly-summary';
 import { useTransactions } from '@/context/TransactionContext';
+import type { Transaction } from '@/context/TransactionContext'
+import { toast } from 'sonner';
 
 interface User {
   id: string;
@@ -27,23 +29,33 @@ interface User {
   email: string;
 }
 
-interface Transaction {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  type: 'income' | 'expense';
-  date: string;
-}
 
 interface DashboardProps {
   activeView: string;
   user: User | null;
 }
 
+export interface UpdateTransactionPayload {
+  amount?: number
+  type?: "income" | "expense"
+  categoryId?: string
+  description?: string
+  date?: string
+}
+
 export default function Dashboard({ activeView, user }: DashboardProps) { // Declare user variable
 
-  const { categories, transactions, getAllCategories, getTransactions } = useTransactions()
+  const [transactionTab, setTransactionTab] = useState<'overview' | 'list'>('overview')
+
+  const {
+    categories,
+    transactions,
+    getAllCategories,
+    getTransactions,
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
+  } = useTransactions()
 
   useEffect(() => {
     getAllCategories()
@@ -68,35 +80,54 @@ export default function Dashboard({ activeView, user }: DashboardProps) { // Dec
     };
   }, [transactions]);
 
-  const handleAddTransaction = (
+  const handleAddTransaction = async (
     description: string,
     amount: number,
-    category: string,
+    categoryId: string,
     type: 'income' | 'expense',
-    date: string,
   ) => {
-    const newTransaction: Transaction = {
-      id: Math.random().toString(36).substr(2, 9),
+    const res = await addTransaction({
       description,
       amount,
-      category,
+      categoryId,
       type,
-      date,
-    };
+    })
 
-    // setTransactions([newTransaction, ...transactions]);
-  };
+    if (res.success) {
+      toast.success("Transaction added successfully.")
+      await getTransactions() //refresh list
+    }
+  }
 
-  const handleEditTransaction = (id: string, updates: Partial<Transaction>) => {
-    // setTransactions(
-    //   transactions.map((t) => (t.id === id ? { ...t, ...updates } : t))
-    // );
-  };
 
-  const handleDeleteTransaction = (id: string) => {
-    // setTransactions(transactions.filter((t) => t.id !== id));
-  };
+  const handleEditTransaction = async (
+    id: string,
+    updates: UpdateTransactionPayload
+  ) => {
+    const res = await updateTransaction(id, {
+      amount: updates.amount,
+      description: updates.description,
+      categoryId: updates.categoryId,
+      type: updates.type,
+      date: updates.date,
+    })
 
+    if (res.success) {
+      await getTransactions()
+      toast.success("Transaction updated successfully.")
+    }
+  }
+
+
+
+  const handleDeleteTransaction = async (id: string) => {
+    const res = await deleteTransaction(id)
+
+    if (res.success) {
+      await getTransactions()
+      toast.success("Transaction deleted successfully.")
+    }
+  }
 
 
   const renderView = () => {
@@ -135,7 +166,10 @@ export default function Dashboard({ activeView, user }: DashboardProps) { // Dec
 
               <TransactionList
                 transactions={transactions.slice(0, 5)}
+                categories={categories}
                 onDelete={handleDeleteTransaction}
+                onEdit={handleEditTransaction}
+
               />
             </div>
           </div>
@@ -145,30 +179,70 @@ export default function Dashboard({ activeView, user }: DashboardProps) { // Dec
       case 'transactions':
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <BalanceCard title="Income" amount={balanceData.income} type="income" />
-              <BalanceCard title="Expenses" amount={balanceData.expenses} type="expense" />
-              <BalanceCard title="Balance" amount={balanceData.balance} type="balance" />
+            {/* TAB HEADER */}
+            <div className="flex justify-center mb-8">
+              <div className="grid grid-cols-2 bg-muted rounded-2xl p-1 w-full max-w-8xl shadow-sm">
+
+                <button
+                  onClick={() => setTransactionTab('overview')}
+                  className={`py-4 rounded-xl text-sm font-semibold transition-all duration-200
+        ${transactionTab === 'overview'
+                      ? 'bg-background shadow text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                >
+                  Overview
+                </button>
+
+                <button
+                  onClick={() => setTransactionTab('list')}
+                  className={`py-4 rounded-xl text-sm font-semibold transition-all duration-200
+        ${transactionTab === 'list'
+                      ? 'bg-background shadow text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                >
+                  All Transactions
+                </button>
+
+              </div>
             </div>
 
-            <div className="bg-card border border-border rounded-xl p-6">
-              <TransactionForm
-                categories={categories}
-                onAddTransaction={handleAddTransaction}
-              />
-            </div>
 
-            <div className="bg-card border border-border rounded-xl p-6">
-              <h2 className="flex items-center gap-2 text-lg font-semibold mb-4">
-                <TrendingDown className="w-5 h-5 text-primary" />
-                All Transactions
-              </h2>
+            {/* TAB CONTENT */}
+            {transactionTab === 'overview' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <BalanceCard title="Income" amount={balanceData.income} type="income" />
+                  <BalanceCard title="Expenses" amount={balanceData.expenses} type="expense" />
+                  <BalanceCard title="Balance" amount={balanceData.balance} type="balance" />
+                </div>
 
-              <TransactionList
-                transactions={transactions}
-                onDelete={handleDeleteTransaction}
-              />
-            </div>
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <TransactionForm
+                    categories={categories}
+                    onAddTransaction={handleAddTransaction}
+                  />
+                </div>
+              </>
+            )}
+
+            {transactionTab === 'list' && (
+              <div className="bg-card border border-border rounded-xl p-6">
+                <h2 className="flex items-center gap-2 text-lg font-semibold mb-4">
+                  <TrendingDown className="w-5 h-5 text-primary" />
+                  All Transactions
+                </h2>
+
+                <TransactionList
+                  transactions={transactions}
+                  categories={categories}
+                  onDelete={handleDeleteTransaction}
+                  onEdit={handleEditTransaction}
+                />
+              </div>
+            )}
+
           </div>
         )
 

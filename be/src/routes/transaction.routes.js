@@ -78,82 +78,115 @@ router.get("/transactions", authMiddleware, async (req, res) => {
     }
 })
 
-// PUT    /api/transactions/:id
+// PUT    /api/transactions/:transactionId
 router.put("/transactions/:transactionId", authMiddleware, async (req, res) => {
     try {
-        const db = req.db;
-        const user = req.user;
-        const { transactionId } = req.params;
-        const { amount, type, categoryId, description } = req.body;
+        const db = req.db
+        const user = req.user
+        const { transactionId } = req.params
+        const { amount, type, categoryId, description, date } = req.body
 
+        // validate transactionId
         if (!ObjectId.isValid(transactionId)) {
-            return res.status(400).json({ message: "transactionId không hợp lệ" });
+            return res.status(400).json({ message: "transactionId không hợp lệ" })
         }
 
-        if (!amount && !type && !categoryId && !description) {
-            return res.status(400).json({ message: "Không có dữ liệu để cập nhật" });
+        // không có gì để update
+        if (
+            amount === undefined &&
+            type === undefined &&
+            categoryId === undefined &&
+            description === undefined &&
+            date === undefined
+        ) {
+            return res
+                .status(400)
+                .json({ message: "Không có dữ liệu để cập nhật" })
         }
 
-        //tt để update
-        let updateTransaction = {
+        // object update
+        const updateTransaction = {
             updatedAt: new Date().toISOString(),
-        };
-
-        if (amount !== undefined) {
-            const amountNumber = Number(amount);
-            if (isNaN(amountNumber) || amountNumber <= 0) {
-                return res.status(400).json({ message: "Amount không hợp lệ" });
-            }
-            updateTransaction.amount = amountNumber;
         }
 
+        // amount
+        if (amount !== undefined) {
+            const amountNumber = Number(amount)
+            if (isNaN(amountNumber) || amountNumber <= 0) {
+                return res.status(400).json({ message: "Amount không hợp lệ" })
+            }
+            updateTransaction.amount = amountNumber
+        }
+
+        // type
         if (type) {
             if (type !== "income" && type !== "expense") {
-                return res.status(400).json({ message: "Type không hợp lệ" });
+                return res.status(400).json({ message: "Type không hợp lệ" })
             }
-            updateTransaction.type = type;
+            updateTransaction.type = type
         }
 
-        if (description) {
-            updateTransaction.description = description;
+        // description
+        if (description !== undefined) {
+            updateTransaction.description = description
         }
 
+        // category
         if (categoryId) {
             if (!ObjectId.isValid(categoryId)) {
-                return res.status(400).json({ message: "CategoryId không hợp lệ" });
+                return res
+                    .status(400)
+                    .json({ message: "CategoryId không hợp lệ" })
             }
 
             const category = await db.collection("categories").findOne({
                 _id: new ObjectId(categoryId),
-            });
+            })
 
             if (!category) {
-                return res.status(400).json({ message: "Category không tồn tại" });
+                return res
+                    .status(400)
+                    .json({ message: "Category không tồn tại" })
             }
 
-            updateTransaction.categoryId = category._id;
-            updateTransaction.categoryName = category.name;
-            updateTransaction.categoryIcon = category.icon;
+            updateTransaction.categoryId = category._id
+            updateTransaction.categoryName = category.name
+            updateTransaction.categoryIcon = category.icon
         }
 
+        // date -> update createdAt
+        if (date) {
+            const parsedDate = new Date(date)
+            if (isNaN(parsedDate.getTime())) {
+                return res.status(400).json({ message: "Date không hợp lệ" })
+            }
+            updateTransaction.createdAt = parsedDate.toISOString()
+        }
+
+        // update DB
         const result = await db.collection("transactions").updateOne(
             {
                 _id: new ObjectId(transactionId),
                 userId: new ObjectId(user._id),
             },
             { $set: updateTransaction }
-        );
+        )
 
         if (result.matchedCount === 0) {
-            return res.status(404).json({ message: "Transaction không tồn tại" });
+            return res
+                .status(404)
+                .json({ message: "Transaction không tồn tại" })
         }
 
-        return res.json({ message: "Cập nhật transaction thành công" });
-
+        return res.status(200).json({
+            message: "Cập nhật transaction thành công",
+        })
     } catch (err) {
-        return res.status(500).json({ message: err.message });
+        console.error("UPDATE TRANSACTION ERROR:", err)
+        return res.status(500).json({ message: "Server error" })
     }
-});
+})
+
 
 
 // DELETE /api/transactions/:id
