@@ -196,9 +196,13 @@ export default function TransactionForm({
           </div>
         </div>
 
-        <Button type="submit" className="w-full text-white/90!">
+        <Button
+          type="submit"
+          className="w-full bg-black! text-white! dark:bg-white! dark:text-black!"
+        >
           Add {type === 'income' ? 'Income' : 'Expense'}
         </Button>
+
       </form>
     </Card>
   );

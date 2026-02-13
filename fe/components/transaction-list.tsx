@@ -160,6 +160,7 @@ export default function TransactionList({
               className="min-w-[180px]"
               popupMatchSelectWidth={false}
               placement="bottomLeft"
+
             />
 
           </div>
@@ -287,10 +288,19 @@ export default function TransactionList({
                 <div className="flex gap-3">
                   <button
                     onClick={() => handleSaveEdit(t._id)}
-                    className="flex-1 bg-primary text-white! py-2 rounded-xl text-sm font-medium hover:opacity-90"
+                    className="
+    flex-1 
+    bg-black! text-white! 
+    dark:bg-white! dark:text-black!
+    py-2 rounded-xl 
+    text-sm font-medium 
+    hover:opacity-90 
+    transition
+  "
                   >
                     Save
                   </button>
+
                   <button
                     onClick={() => setEditingId(null)}
                     className="flex-1 bg-muted py-2 rounded-xl text-sm hover:bg-muted/70"

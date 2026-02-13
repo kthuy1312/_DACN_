@@ -166,10 +166,11 @@ export default function CalendarView({ transactions }: CalendarViewProps) {
                         flex flex-col items-center justify-center
                         text-sm font-medium
                         transition-all duration-200
-                        ${isSelected
-                        ? 'bg-primary text-primary-foreground shadow-lg scale-[1.03]'
-                        : 'bg-card border border-border hover:border-primary hover:shadow-md'
+                       ${isSelected
+                        ? 'border-2 border-foreground text-foreground scale-[1.05]'
+                        : 'bg-card border border-border hover:border-foreground'
                       }
+
                       `}
                   >
                     <span>{day}</span>

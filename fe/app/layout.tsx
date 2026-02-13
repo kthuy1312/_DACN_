@@ -7,6 +7,7 @@ import { AuthProvider } from "@/context/AuthContext"
 import 'antd/dist/reset.css'
 import { Toaster } from 'sonner'
 import { TransactionProvider } from "@/context/TransactionContext"
+import { ConfigProvider, theme } from "antd"
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -42,11 +43,22 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        <AuthProvider>
-          <TransactionProvider>
-            {children}
-          </TransactionProvider>
-        </AuthProvider>
+        <ConfigProvider
+          theme={{
+            algorithm: theme.defaultAlgorithm, // sẽ tự theo dark nếu bạn cấu hình thêm bên dưới
+            token: {
+              colorBgContainer: "var(--card)",
+              colorText: "var(--foreground)",
+              colorBorder: "var(--border)",
+            },
+          }}
+        >
+          <AuthProvider>
+            <TransactionProvider>
+              {children}
+            </TransactionProvider>
+          </AuthProvider>
+        </ConfigProvider>
 
         <Analytics />
         <Toaster
