@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import dayjs from 'dayjs';
 
 export type LucideIconName = string
 export type DateString = string
@@ -43,20 +44,29 @@ export default function CalendarView({ transactions }: CalendarViewProps) {
 
   const transactionsByDate = useMemo(() => {
     const map: { [key: string]: Transaction[] } = {};
+
     transactions.forEach((transaction) => {
       if (transaction.createdAt) {
-        if (!map[transaction.createdAt]) {
-          map[transaction.createdAt] = [];
+        const dateKey = dayjs(transaction.createdAt).format("YYYY-MM-DD");
+
+        if (!map[dateKey]) {
+          map[dateKey] = [];
         }
-        map[transaction.createdAt].push(transaction);
+
+        map[dateKey].push(transaction);
       }
     });
+
     return map;
   }, [transactions]);
 
-  const [selectedDate, setSelectedDate] = useState<string | null>(
-    new Date().toISOString().split('T')[0],
-  );
+
+  const today = new Date()
+  const defaultDate = `${today.getFullYear()}-${String(
+    today.getMonth() + 1
+  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`
+  const [selectedDate, setSelectedDate] = useState<string | null>(defaultDate)
+
 
   const handlePrevMonth = () => {
     setCurrentDate(new Date(year, month - 1));
@@ -67,8 +77,9 @@ export default function CalendarView({ transactions }: CalendarViewProps) {
   };
 
   const getDateString = (day: number) => {
-    return new Date(year, month, day).toISOString().split('T')[0];
+    return dayjs(new Date(year, month, day)).format("YYYY-MM-DD");
   };
+
 
   const dayTransactions = selectedDate ? transactionsByDate[selectedDate] || [] : [];
   const dayExpenses = dayTransactions
@@ -179,9 +190,11 @@ export default function CalendarView({ transactions }: CalendarViewProps) {
                       <span
                         className={`
                             mt-1 text-[10px] px-2 py-0.5 rounded-full
-                            ${isSelected
-                            ? 'bg-primary-foreground/20 text-primary-foreground'
+                           ${isSelected
+                            ? 'bg-primary text-primary-foreground'
                             : 'bg-destructive/10 text-destructive'
+                          }
+
                           }
                           `}
                       >
