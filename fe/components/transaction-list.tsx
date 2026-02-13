@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Receipt, Trash2 } from 'lucide-react'
 import { DatePicker, Input, InputNumber, Popconfirm } from 'antd'
 import Icon from '@/lib/icon'
 import { UpdateTransactionPayload } from './dashboard'
@@ -92,13 +92,29 @@ export default function TransactionList({
 
   if (transactions.length === 0) {
     return (
-      <Card className="border border-border bg-muted/30">
-        <div className="p-10 text-center">
-          <p className="text-lg font-medium">No transactions yet</p>
+      <Card className="border border-border bg-card rounded-2xl shadow-sm">
+        <div className="flex flex-col items-center justify-center py-20 px-6 text-center space-y-5">
+
+          {/* Icon */}
+          <div className="w-20 h-20 rounded-2xl bg-muted flex items-center justify-center shadow-inner">
+            <Receipt className="w-8 h-8 text-muted-foreground" />
+          </div>
+
+          {/* Title */}
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-foreground">
+              No transactions yet
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              You haven’t added any transactions. Start by adding your first income or expense.
+            </p>
+          </div>
+
         </div>
       </Card>
     )
   }
+
 
   return (
     <Card className="border border-border bg-card rounded-2xl shadow-sm">

@@ -138,40 +138,11 @@ export default function Dashboard({ activeView, user }: DashboardProps) { // Dec
             {/* OVERVIEW */}
             <MonthlySummary transactions={transactions} />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <BalanceCard title="Income" amount={balanceData.income} type="income" />
-              <BalanceCard title="Expenses" amount={balanceData.expenses} type="expense" />
-              <BalanceCard title="Balance" amount={balanceData.balance} type="balance" />
-            </div>
-
-            {/* FORM */}
-            <div className="bg-card border border-border rounded-xl p-6">
-              <TransactionForm
-                categories={categories}
-                onAddTransaction={handleAddTransaction}
-              />
-            </div>
-
-            {/*ANALYTICS – RIÊNG */}
+            {/*ANALYTICS */}
             <div className="bg-card border border-border rounded-2xl p-6">
               <Analytics transactions={transactions} />
             </div>
 
-            {/* RECENT TRANSACTIONS */}
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-              <h2 className="flex items-center gap-2 text-lg font-semibold mb-4 text-foreground">
-                <Wallet className="w-5 h-5 text-primary" />
-                Recent Transactions
-              </h2>
-
-              <TransactionList
-                transactions={transactions.slice(0, 5)}
-                categories={categories}
-                onDelete={handleDeleteTransaction}
-                onEdit={handleEditTransaction}
-
-              />
-            </div>
           </div>
 
         )
